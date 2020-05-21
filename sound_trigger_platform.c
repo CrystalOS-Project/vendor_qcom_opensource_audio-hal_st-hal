@@ -64,6 +64,7 @@ typedef unsigned char __u8;
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#include <sound/asound.h>
 #include <sound/msmcal-hwdep.h>
 #include <linux/msm_audio_calibration.h> /* for AUDIO_CORE_METAINFO_CAL_TYPE; audio_cal_info_metainfo */
 #include <sound/lsm_params.h>
@@ -4693,9 +4694,12 @@ bool platform_stdev_check_and_update_concurrency
                 num_sessions > stdev->rx_conc_max_st_ses)
                 concurrency_ses_allowed = false;
         }
-        if (concurrency_ses_allowed && stdev->conc_capture_supported) {
-            if ((!stdev->conc_voice_call_supported && stdev->conc_voice_active) ||
-                (!stdev->conc_voip_call_supported && stdev->conc_voip_active))
+        if (concurrency_ses_allowed) {
+            if ((!stdev->conc_capture_supported &&
+                 stdev->tx_concurrency_active > 0) ||
+                (stdev->conc_capture_supported &&
+                 ((!stdev->conc_voice_call_supported && stdev->conc_voice_active) ||
+                  (!stdev->conc_voip_call_supported && stdev->conc_voip_active))))
                 concurrency_ses_allowed = false;
         }
     } else {
